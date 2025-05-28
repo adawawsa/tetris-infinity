@@ -271,13 +271,125 @@ export class CommandQueue {
 }
 
 /**
+ * Skill command for infinity mode
+ */
+export class SkillCommand extends Command {
+    constructor(data) {
+        super('skill', data);
+        this.skillIndex = data.skillIndex;
+    }
+    
+    execute(gameState) {
+        // Check if skill system exists (infinity mode)
+        if (!gameState.skillSystem) return false;
+        
+        // Try to use skill
+        const skill = gameState.skillSystem.getSkill(this.skillIndex);
+        if (!skill || !skill.canUse()) return false;
+        
+        // Execute skill
+        const success = skill.execute(gameState);
+        
+        if (success) {
+            gameState.addEvent('skillUsed', {
+                skillIndex: this.skillIndex,
+                skillType: skill.type,
+                timestamp: Date.now()
+            });
+        }
+        
+        return success;
+    }
+    
+    undo(gameState) {
+        // Skills typically can't be undone
+    }
+}
+
+/**
+ * Item command for infinity mode
+ */
+export class ItemCommand extends Command {
+    constructor(data) {
+        super('item', data);
+        this.itemIndex = data.itemIndex;
+    }
+    
+    execute(gameState) {
+        // Check if item system exists (infinity mode)
+        if (!gameState.itemSystem) return false;
+        
+        // Try to use item
+        const item = gameState.itemSystem.getItem(this.itemIndex);
+        if (!item) return false;
+        
+        // Execute item
+        const success = gameState.itemSystem.useItem(this.itemIndex);
+        
+        if (success) {
+            gameState.addEvent('itemUsed', {
+                itemIndex: this.itemIndex,
+                itemType: item.type,
+                timestamp: Date.now()
+            });
+        }
+        
+        return success;
+    }
+    
+    undo(gameState) {
+        // Items typically can't be undone
+    }
+}
+
+/**
+ * Garbage command for battle mode
+ */
+export class GarbageCommand extends Command {
+    constructor(data) {
+        super('garbage', data);
+        this.lines = data.lines;
+        this.source = data.source || 'opponent';
+    }
+    
+    execute(gameState) {
+        // Check if battle state exists
+        if (!gameState.battleState) return false;
+        
+        // Add garbage to queue
+        gameState.battleState.garbageQueue.push({
+            lines: this.lines,
+            source: this.source,
+            timestamp: Date.now()
+        });
+        
+        gameState.addEvent('garbageReceived', {
+            lines: this.lines,
+            source: this.source
+        });
+        
+        return true;
+    }
+    
+    undo(gameState) {
+        // Remove from queue if possible
+        if (gameState.battleState && gameState.battleState.garbageQueue.length > 0) {
+            gameState.battleState.garbageQueue.pop();
+        }
+    }
+}
+
+/**
  * Command Registry for deserialization
  */
 export const CommandRegistry = {
     'move': MoveCommand,
     'rotate': RotateCommand,
     'hardDrop': HardDropCommand,
-    'hold': HoldCommand
+    'hold': HoldCommand,
+    'skill': SkillCommand,
+    'item': ItemCommand,
+    'garbage': GarbageCommand
 };
 
 /**

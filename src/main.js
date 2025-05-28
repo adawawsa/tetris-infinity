@@ -130,23 +130,58 @@ class TetrisInfinityEX {
         
         // Import appropriate game mode
         let GameMode;
+        let useRefactored = USE_REFACTORED_VERSION;
+        
         switch(mode) {
             case 'marathon':
-                const { InfinityMode } = await import('./game/modes/InfinityMode.js');
-                GameMode = InfinityMode;
+                if (USE_REFACTORED_VERSION) {
+                    const { InfinityModeRefactored } = await import('./game/modes/InfinityModeRefactored.js');
+                    GameMode = InfinityModeRefactored;
+                } else {
+                    const { InfinityMode } = await import('./game/modes/InfinityMode.js');
+                    GameMode = InfinityMode;
+                }
                 break;
             case 'battle':
-                const { BattleMode } = await import('./game/modes/BattleMode.js');
-                GameMode = BattleMode;
+                if (USE_REFACTORED_VERSION) {
+                    const { BattleModeRefactored } = await import('./game/modes/BattleModeRefactored.js');
+                    GameMode = BattleModeRefactored;
+                } else {
+                    const { BattleMode } = await import('./game/modes/BattleMode.js');
+                    GameMode = BattleMode;
+                }
+                break;
+            case 'sprint':
+                if (USE_REFACTORED_VERSION) {
+                    const { SprintModeRefactored } = await import('./game/modes/SprintModeRefactored.js');
+                    GameMode = SprintModeRefactored;
+                } else {
+                    // Fall back to base game for now
+                    GameMode = Game;
+                }
+                break;
+            case 'blitz':
+                if (USE_REFACTORED_VERSION) {
+                    const { BlitzModeRefactored } = await import('./game/modes/BlitzModeRefactored.js');
+                    GameMode = BlitzModeRefactored;
+                } else {
+                    // Fall back to base game for now
+                    GameMode = Game;
+                }
                 break;
             default:
-                GameMode = Game;
+                if (USE_REFACTORED_VERSION) {
+                    const { MarathonModeRefactored } = await import('./game/modes/MarathonModeRefactored.js');
+                    GameMode = MarathonModeRefactored;
+                } else {
+                    GameMode = Game;
+                }
         }
         
         // Create new game instance
-        if (USE_REFACTORED_VERSION && mode === 'marathon') {
-            // Use refactored version for marathon mode
-            this.game = new GameRefactored(this, {
+        if (useRefactored) {
+            // Use refactored version
+            this.game = new GameMode(this, {
                 mode: mode,
                 seed: Date.now(),
                 playerId: 'local',
@@ -154,7 +189,7 @@ class TetrisInfinityEX {
             });
             this.game.start();
         } else {
-            // Use original version for other modes
+            // Use original version
             this.game = new GameMode(this, mode);
             this.game.init();
         }

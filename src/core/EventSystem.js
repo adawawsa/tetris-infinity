@@ -58,12 +58,15 @@ export const EventTypes = {
     GAME_PAUSE: 'game:pause',
     GAME_RESUME: 'game:resume',
     GAME_OVER: 'game:over',
+    GAME_VICTORY: 'game:victory',
     
     // Input Events
     INPUT_MOVE: 'input:move',
     INPUT_ROTATE: 'input:rotate',
     INPUT_DROP: 'input:drop',
     INPUT_HOLD: 'input:hold',
+    INPUT_SKILL: 'input:skill',
+    INPUT_ITEM: 'input:item',
     
     // Game Events
     PIECE_SPAWN: 'piece:spawn',
@@ -75,6 +78,20 @@ export const EventTypes = {
     LINES_CLEAR: 'lines:clear',
     SCORE_UPDATE: 'score:update',
     LEVEL_UP: 'level:up',
+    PERFECT_CLEAR: 'perfect:clear',
+    
+    // Mode Events
+    MODE_START: 'mode:start',
+    MODE_END: 'mode:end',
+    
+    // Infinity Mode Events
+    INFINITY_LEVEL_UP: 'infinity:levelup',
+    SKILL_USE: 'skill:use',
+    SKILL_COOLDOWN: 'skill:cooldown',
+    ITEM_USE: 'item:use',
+    ITEM_PICKUP: 'item:pickup',
+    ITEM_EXPIRE: 'item:expire',
+    ACHIEVEMENT_UNLOCK: 'achievement:unlock',
     
     // Multiplayer Events
     PLAYER_JOIN: 'player:join',
