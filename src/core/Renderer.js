@@ -45,6 +45,37 @@ export class Renderer {
         this.effectsCtx.clearRect(0, 0, this.effectsCanvas.width, this.effectsCanvas.height);
     }
     
+    // Main render method for GameRefactored
+    render(gameState, interpolation = 0) {
+        this.clear();
+        
+        // Draw board
+        this.drawBoard(gameState.board);
+        
+        // Draw current piece
+        if (gameState.currentPiece) {
+            this.drawPiece(gameState.currentPiece);
+        }
+        
+        // Draw ghost piece
+        if (gameState.currentPiece) {
+            this.drawGhostPiece(gameState.currentPiece, gameState.board);
+        }
+        
+        // Draw held piece
+        if (gameState.heldPiece) {
+            this.drawHeldPiece(gameState.heldPiece, !gameState.canHold);
+        }
+        
+        // Draw next pieces
+        if (gameState.nextPieces) {
+            this.drawNextPieces(gameState.nextPieces);
+        }
+        
+        // Draw grid overlay
+        this.drawGrid();
+    }
+    
     drawBoard(board) {
         // Draw grid lines if enabled
         if (this.shouldDrawGrid()) {
@@ -80,21 +111,47 @@ export class Renderer {
         }
     }
     
-    drawGhostPiece(piece, ghostY) {
+    drawGhostPiece(piece, board) {
+        // Calculate ghost piece position
+        let ghostY = piece.y;
         const shape = piece.getShape();
         
+        // Find the lowest valid position
+        while (this.isValidPosition(piece.x, ghostY + 1, shape, board)) {
+            ghostY++;
+        }
+        
+        // Draw ghost piece
         for (let row = 0; row < shape.length; row++) {
             for (let col = 0; col < shape[row].length; col++) {
                 if (shape[row][col]) {
                     const x = piece.x + col;
                     const y = ghostY + row;
                     
-                    if (y >= 0) {
+                    if (y >= 0 && y !== piece.y + row) {
                         this.drawGhostCell(x, y);
                     }
                 }
             }
         }
+    }
+    
+    isValidPosition(x, y, shape, board) {
+        for (let row = 0; row < shape.length; row++) {
+            for (let col = 0; col < shape[row].length; col++) {
+                if (shape[row][col]) {
+                    const boardX = x + col;
+                    const boardY = y + row;
+                    
+                    if (boardX < 0 || boardX >= this.boardWidth ||
+                        boardY >= this.boardHeight ||
+                        (boardY >= 0 && board[boardY][boardX])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
     
     drawCell(x, y, color) {

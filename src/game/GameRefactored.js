@@ -432,7 +432,10 @@ export class GameRefactored {
             duration: this.currentFrame * this.frameTime
         };
         
-        this.app.showGameOver(stats);
+        // Show game over screen
+        if (this.app.menuManager) {
+            this.app.menuManager.showGameOver(stats);
+        }
     }
     
     onInputMove(event) {
@@ -491,8 +494,45 @@ export class GameRefactored {
         } else if (this.gameState.gameStatus === 'paused') {
             this.gameState.gameStatus = 'playing';
             this.lastTime = performance.now();
+            this.gameLoop();
             this.eventDispatcher.emit(new GameEvent(EventTypes.GAME_RESUME));
         }
+    }
+    
+    // Compatibility methods for main.js
+    render(interpolation = 0) {
+        // Render game using the app's renderer
+        if (this.app.renderer) {
+            this.app.renderer.render(this.gameState, interpolation);
+        }
+        
+        // Update UI
+        this.updateUI();
+    }
+    
+    destroy() {
+        // Stop game loop
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        
+        // Clear event listeners
+        this.eventDispatcher.clear();
+        
+        // Reset state
+        this.gameState.gameStatus = 'idle';
+    }
+    
+    reset() {
+        // Reset game state
+        this.destroy();
+        this.initializeState();
+    }
+    
+    init() {
+        // Alias for start method for compatibility
+        this.start();
     }
     
     // Snapshot methods for rollback netcode

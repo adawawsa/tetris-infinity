@@ -1,4 +1,5 @@
 import { Game } from './game/Game.js';
+import { GameRefactored } from './game/GameRefactored.js';
 import { MenuManager } from './ui/MenuManager.js';
 import { SettingsManager } from './ui/SettingsManager.js';
 import { AudioManager } from './audio/AudioManager.js';
@@ -6,6 +7,9 @@ import { InputManager } from './core/InputManager.js';
 import { Renderer } from './core/Renderer.js';
 import { NetworkManager } from './network/NetworkManager.js';
 import { StatsManager } from './utils/StatsManager.js';
+
+// Configuration flag to use refactored version
+const USE_REFACTORED_VERSION = true;
 
 class TetrisInfinityEX {
     constructor() {
@@ -140,8 +144,20 @@ class TetrisInfinityEX {
         }
         
         // Create new game instance
-        this.game = new GameMode(this, mode);
-        this.game.init();
+        if (USE_REFACTORED_VERSION && mode === 'marathon') {
+            // Use refactored version for marathon mode
+            this.game = new GameRefactored(this, {
+                mode: mode,
+                seed: Date.now(),
+                playerId: 'local',
+                isMultiplayer: false
+            });
+            this.game.start();
+        } else {
+            // Use original version for other modes
+            this.game = new GameMode(this, mode);
+            this.game.init();
+        }
         
         // Play game start sound
         this.audioManager.play('gameStart');
