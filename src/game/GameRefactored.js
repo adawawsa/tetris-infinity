@@ -73,6 +73,43 @@ export class GameRefactored {
         }));
     }
     
+    generateNextPieces() {
+        // Generate a bag of 7 pieces
+        const pieces = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+        
+        // Simple shuffle using seed-based random
+        const shuffled = [...pieces];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        
+        // Add to next pieces
+        shuffled.forEach(type => {
+            this.gameState.nextPieces.push(new Piece(type));
+        });
+    }
+    
+    spawnNewPiece() {
+        if (this.gameState.nextPieces.length < 7) {
+            this.generateNextPieces();
+        }
+        
+        this.gameState.currentPiece = this.gameState.nextPieces.shift();
+        this.gameState.canHold = true;
+        
+        // Check if valid spawn position
+        if (this.gameLogic && !this.gameLogic.isValidPosition(
+            this.gameState.currentPiece.x,
+            this.gameState.currentPiece.y,
+            this.gameState.currentPiece.getShape()
+        )) {
+            this.eventDispatcher.emit(new GameEvent(EventTypes.GAME_OVER, {
+                reason: 'spawn_blocked'
+            }));
+        }
+    }
+    
     setupEventHandlers() {
         // Game state events
         this.eventDispatcher.on(EventTypes.PIECE_SPAWN, this.onPieceSpawn.bind(this));
@@ -243,6 +280,13 @@ export class GameRefactored {
         
         // Spawn next piece
         this.spawnNewPiece();
+    }
+    
+    getNextPiece() {
+        if (this.gameState.nextPieces.length < 7) {
+            this.generateNextPieces();
+        }
+        return this.gameState.nextPieces.shift();
     }
     
     placePieceOnBoard(piece) {
@@ -476,15 +520,23 @@ export class GameRefactored {
     }
     
     updateUI() {
-        document.getElementById('score').textContent = this.gameState.score.toLocaleString();
-        document.getElementById('lines').textContent = this.gameState.lines;
-        document.getElementById('level').textContent = this.gameState.level;
+        const scoreEl = document.getElementById('score');
+        if (scoreEl) scoreEl.textContent = this.gameState.score.toLocaleString();
         
-        const elapsed = (this.currentFrame * this.frameTime) / 1000;
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = Math.floor(elapsed % 60);
-        document.getElementById('time').textContent = 
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const linesEl = document.getElementById('lines');
+        if (linesEl) linesEl.textContent = this.gameState.lines;
+        
+        const levelEl = document.getElementById('level');
+        if (levelEl) levelEl.textContent = this.gameState.level;
+        
+        const timeEl = document.getElementById('time');
+        if (timeEl) {
+            const elapsed = (this.currentFrame * this.frameTime) / 1000;
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = Math.floor(elapsed % 60);
+            timeEl.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
     }
     
     togglePause() {

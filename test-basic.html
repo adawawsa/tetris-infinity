@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Basic Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        #game-container {
+            text-align: center;
+        }
+        
+        canvas {
+            border: 2px solid #fff;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        #info {
+            margin: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        #error {
+            color: #ff0000;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ff0000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Tetris Basic Test</h1>
+        <div id="info">
+            <p>Score: <span id="score">0</span></p>
+            <p>Lines: <span id="lines">0</span></p>
+            <p>Level: <span id="level">1</span></p>
+        </div>
+        <canvas id="game-canvas" width="300" height="600"></canvas>
+        <canvas id="effects-canvas" width="300" height="600" style="display:none;"></canvas>
+        <div>
+            <button onclick="startGame()">Start Game</button>
+            <button onclick="pauseGame()">Pause</button>
+        </div>
+        <div id="error"></div>
+    </div>
+
+    <script type="module">
+        import { GameRefactored } from './src/game/GameRefactored.js';
+        
+        window.gameInstance = null;
+        
+        window.startGame = () => {
+            try {
+                console.log('Starting game...');
+                
+                // Create minimal app object
+                const app = {
+                    renderer: {
+                        render: (gameState) => {
+                            // Simple render
+                            const canvas = document.getElementById('game-canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Clear
+                            ctx.fillStyle = '#000';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            
+                            // Draw board
+                            const cellSize = 30;
+                            for (let y = 0; y < 20; y++) {
+                                for (let x = 0; x < 10; x++) {
+                                    if (gameState.board[y][x] > 0) {
+                                        ctx.fillStyle = '#0f0';
+                                        ctx.fillRect(x * cellSize, y * cellSize, cellSize - 2, cellSize - 2);
+                                    }
+                                }
+                            }
+                            
+                            // Draw current piece
+                            if (gameState.currentPiece) {
+                                const piece = gameState.currentPiece;
+                                const shape = piece.getShape();
+                                ctx.fillStyle = '#f00';
+                                
+                                for (let y = 0; y < shape.length; y++) {
+                                    for (let x = 0; x < shape[y].length; x++) {
+                                        if (shape[y][x]) {
+                                            ctx.fillRect(
+                                                (piece.x + x) * cellSize,
+                                                (piece.y + y) * cellSize,
+                                                cellSize - 2,
+                                                cellSize - 2
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    inputManager: {
+                        on: (event, callback) => {
+                            // Simple input handler
+                            document.addEventListener('keydown', (e) => {
+                                switch(e.key) {
+                                    case 'ArrowLeft':
+                                        if (event === 'moveLeft') callback();
+                                        break;
+                                    case 'ArrowRight':
+                                        if (event === 'moveRight') callback();
+                                        break;
+                                    case 'ArrowDown':
+                                        if (event === 'softDrop') callback();
+                                        break;
+                                    case ' ':
+                                        if (event === 'hardDrop') callback();
+                                        break;
+                                    case 'ArrowUp':
+                                    case 'x':
+                                        if (event === 'rotateCW') callback();
+                                        break;
+                                    case 'z':
+                                        if (event === 'rotateCCW') callback();
+                                        break;
+                                    case 'c':
+                                        if (event === 'hold') callback();
+                                        break;
+                                    case 'p':
+                                        if (event === 'pause') callback();
+                                        break;
+                                }
+                            });
+                        }
+                    },
+                    audioManager: {
+                        play: (sound) => console.log('Play sound:', sound)
+                    },
+                    effectsManager: {
+                        playLineClear: () => {},
+                        playLevelUpEffect: () => {}
+                    },
+                    menuManager: {
+                        showGameOver: (stats) => {
+                            alert(`Game Over!\nScore: ${stats.score}\nLines: ${stats.lines}`);
+                        }
+                    }
+                };
+                
+                // Create game instance
+                window.gameInstance = new GameRefactored(app, {
+                    mode: 'marathon',
+                    seed: Date.now(),
+                    playerId: 'test',
+                    isMultiplayer: false
+                });
+                
+                // Start game
+                window.gameInstance.start();
+                
+                console.log('Game started successfully!');
+                
+            } catch (error) {
+                console.error('Error starting game:', error);
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = error.message;
+            }
+        };
+        
+        window.pauseGame = () => {
+            if (window.gameInstance) {
+                window.gameInstance.togglePause();
+            }
+        };
+        
+        // Update UI
+        setInterval(() => {
+            if (window.gameInstance && window.gameInstance.gameState) {
+                document.getElementById('score').textContent = window.gameInstance.gameState.score;
+                document.getElementById('lines').textContent = window.gameInstance.gameState.lines;
+                document.getElementById('level').textContent = window.gameInstance.gameState.level;
+            }
+        }, 100);
+    </script>
+</body>
+</html>

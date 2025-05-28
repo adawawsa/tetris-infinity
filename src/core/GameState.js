@@ -32,6 +32,14 @@ export class GameState {
         this.gameStatus = 'idle';
         this.events = [];
         this.garbage = [];
+        this.nextPieces = [];
+        this.currentPiece = null;
+        this.heldPiece = null;
+        this.canHold = true;
+        this.score = 0;
+        this.lines = 0;
+        this.level = 1;
+        this.combo = 0;
         
         // Initialize player state
         if (config.playerId) {
@@ -226,6 +234,30 @@ export class GameState {
         }
         
         return delta;
+    }
+    
+    /**
+     * Get next piece from queue
+     */
+    getNextPiece() {
+        return this.nextPieces.shift();
+    }
+    
+    /**
+     * Validate state integrity
+     */
+    validate() {
+        // Check board dimensions
+        if (!this.board || this.board.length === 0) return false;
+        
+        // Check for valid board values
+        for (let row of this.board) {
+            for (let cell of row) {
+                if (cell < 0 || cell > 7) return false;
+            }
+        }
+        
+        return true;
     }
 }
 

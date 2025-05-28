@@ -28,34 +28,53 @@ export class TetrisInfinityEX {
     
     async init() {
         try {
+            console.log('Starting initialization...');
             this.showLoadingScreen(true);
             
             // Initialize managers
+            console.log('Initializing AudioManager...');
             this.audioManager = new AudioManager();
+            
+            console.log('Initializing InputManager...');
             this.inputManager = new InputManager();
+            
+            console.log('Initializing SettingsManager...');
             this.settingsManager = new SettingsManager();
+            
+            console.log('Initializing StatsManager...');
             this.statsManager = new StatsManager();
+            
+            console.log('Initializing Renderer...');
             this.renderer = new Renderer('game-canvas', 'effects-canvas');
+            
+            console.log('Initializing NetworkManager...');
             this.networkManager = new NetworkManager();
             
             // Initialize UI managers
+            console.log('Initializing MenuManager...');
             this.menuManager = new MenuManager(this);
             
             // Load saved settings
+            console.log('Loading settings...');
             await this.settingsManager.loadSettings();
             
             // Setup event listeners
+            console.log('Setting up event listeners...');
             this.setupEventListeners();
             
             // Initialize audio
+            console.log('Initializing audio...');
             await this.audioManager.init();
             
+            console.log('Initialization complete!');
             this.showLoadingScreen(false);
             this.showScreen('main-menu');
             
         } catch (error) {
             console.error('Failed to initialize game:', error);
-            this.showError('Failed to initialize game. Please refresh the page.');
+            console.error('Stack trace:', error.stack);
+            this.showLoadingScreen(false);
+            this.showError(`Failed to initialize game: ${error.message}`);
         }
     }
     
@@ -69,36 +88,54 @@ export class TetrisInfinityEX {
         });
         
         // Settings button
-        document.getElementById('settings-btn').addEventListener('click', () => {
-            this.showScreen('settings-screen');
-        });
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                this.showScreen('settings-screen');
+            });
+        }
         
         // Save settings button
-        document.getElementById('save-settings').addEventListener('click', () => {
-            this.settingsManager.saveSettings();
-            this.showScreen('main-menu');
-        });
+        const saveSettingsBtn = document.getElementById('save-settings');
+        if (saveSettingsBtn) {
+            saveSettingsBtn.addEventListener('click', () => {
+                this.settingsManager.saveSettings();
+                this.showScreen('main-menu');
+            });
+        }
         
         // Reset settings button
-        document.getElementById('reset-settings').addEventListener('click', () => {
-            this.settingsManager.resetToDefault();
-        });
+        const resetSettingsBtn = document.getElementById('reset-settings');
+        if (resetSettingsBtn) {
+            resetSettingsBtn.addEventListener('click', () => {
+                this.settingsManager.resetToDefault();
+            });
+        }
         
         // Game over buttons
-        document.getElementById('retry-btn').addEventListener('click', () => {
-            this.restartGame();
-        });
+        const retryBtn = document.getElementById('retry-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                this.restartGame();
+            });
+        }
         
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            this.returnToMenu();
-        });
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                this.returnToMenu();
+            });
+        }
         
         // Pause button
-        document.getElementById('pause-btn').addEventListener('click', () => {
-            if (this.game) {
-                this.game.togglePause();
-            }
-        });
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', () => {
+                if (this.game) {
+                    this.game.togglePause();
+                }
+            });
+        }
         
         // Settings tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -115,9 +152,12 @@ export class TetrisInfinityEX {
         });
         
         // Prevent context menu on game canvas
-        document.getElementById('game-canvas').addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
+        const gameCanvas = document.getElementById('game-canvas');
+        if (gameCanvas) {
+            gameCanvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+            });
+        }
     }
     
     async startGame(mode) {
@@ -293,7 +333,10 @@ export class TetrisInfinityEX {
     
     updateUserLevel() {
         const level = this.statsManager.getUserLevel();
-        document.getElementById('user-level').textContent = level;
+        const userLevelEl = document.getElementById('user-level');
+        if (userLevelEl) {
+            userLevelEl.textContent = level;
+        }
     }
 }
 
