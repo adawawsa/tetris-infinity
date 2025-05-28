@@ -11,7 +11,7 @@ import { StatsManager } from './utils/StatsManager.js';
 // Configuration flag to use refactored version
 const USE_REFACTORED_VERSION = true;
 
-class TetrisInfinityEX {
+export class TetrisInfinityEX {
     constructor() {
         this.game = null;
         this.menuManager = null;

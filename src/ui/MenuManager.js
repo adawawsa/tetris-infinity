@@ -211,4 +211,44 @@ export class MenuManager {
             </div>
         `).join('');
     }
+    
+    showGameOver(stats) {
+        // Update final stats
+        const finalScore = document.getElementById('final-score');
+        const finalLines = document.getElementById('final-lines');
+        const finalTime = document.getElementById('final-time');
+        const finalCombo = document.getElementById('final-combo');
+        
+        if (finalScore) finalScore.textContent = stats.score?.toLocaleString() || '0';
+        if (finalLines) finalLines.textContent = stats.lines || 0;
+        if (finalTime) finalTime.textContent = stats.time || '00:00';
+        if (finalCombo) finalCombo.textContent = stats.maxCombo || 0;
+        
+        // Show game over screen
+        const gameOverScreen = document.getElementById('gameover-screen');
+        if (gameOverScreen) {
+            gameOverScreen.classList.add('active');
+        }
+        
+        // Play game over sound
+        if (this.app.audioManager) {
+            this.app.audioManager.play('gameOver');
+        }
+        
+        // Save stats
+        if (this.app.statsManager && this.app.gameMode) {
+            this.app.statsManager.saveGameStats(this.app.gameMode, stats);
+        }
+    }
+    
+    showVictory(stats) {
+        // Similar to showGameOver but for victory
+        this.showGameOver(stats);
+        
+        // Add victory-specific elements
+        const gameOverTitle = document.querySelector('#gameover-screen h2');
+        if (gameOverTitle) {
+            gameOverTitle.textContent = 'Victory!';
+        }
+    }
 }

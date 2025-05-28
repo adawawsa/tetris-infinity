@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Infinity - Debug</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+        }
+        #log {
+            white-space: pre-wrap;
+            background: #111;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tetris Infinity Debug</h1>
+    <div>
+        <button onclick="initGame()">Initialize Game</button>
+        <button onclick="startMarathon()">Start Marathon</button>
+        <button onclick="startBattle()">Start Battle</button>
+    </div>
+    <div id="log"></div>
+
+    <script type="module">
+        import { TetrisInfinityEX } from './src/main.js';
+        
+        const log = (msg) => {
+            const logEl = document.getElementById('log');
+            logEl.textContent += `[${new Date().toISOString()}] ${msg}\n`;
+            console.log(msg);
+        };
+        
+        window.initGame = async () => {
+            try {
+                log('Creating game instance...');
+                const game = new TetrisInfinityEX();
+                window.tetrisGame = game;
+                
+                log('Initializing game...');
+                await game.init();
+                
+                log('Game initialized successfully!');
+            } catch (error) {
+                log(`Error: ${error.message}`);
+                console.error(error);
+            }
+        };
+        
+        window.startMarathon = async () => {
+            try {
+                if (!window.tetrisGame) {
+                    log('Game not initialized!');
+                    return;
+                }
+                
+                log('Starting marathon mode...');
+                await window.tetrisGame.startGame('marathon');
+                log('Marathon mode started!');
+            } catch (error) {
+                log(`Error: ${error.message}`);
+                console.error(error);
+            }
+        };
+        
+        window.startBattle = async () => {
+            try {
+                if (!window.tetrisGame) {
+                    log('Game not initialized!');
+                    return;
+                }
+                
+                log('Starting battle mode...');
+                await window.tetrisGame.startGame('battle');
+                log('Battle mode started!');
+            } catch (error) {
+                log(`Error: ${error.message}`);
+                console.error(error);
+            }
+        };
+        
+        // Auto-initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded, ready to initialize.');
+        });
+    </script>
+</body>
+</html>
