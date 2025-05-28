@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Piece Test</title>
+</head>
+<body>
+    <h1>Piece Class Test</h1>
+    <pre id="output"></pre>
+    
+    <script type="module">
+        import { Piece } from './src/game/Piece.js';
+        
+        const output = document.getElementById('output');
+        
+        function log(msg) {
+            output.textContent += msg + '\n';
+        }
+        
+        // Test Piece creation
+        log('Testing Piece class...\n');
+        
+        const testTypes = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+        
+        testTypes.forEach(type => {
+            const piece = new Piece(type);
+            log(`Type: ${type}`);
+            log(`  piece.type: ${piece.type}`);
+            log(`  piece.typeId: ${piece.typeId}`);
+            log(`  piece.color: ${piece.color}`);
+            log(`  piece.getShape(): ${JSON.stringify(piece.getShape())}`);
+            log('');
+        });
+        
+        // Test getTypeId method directly
+        log('\nTesting getTypeId method:');
+        const piece = new Piece('T');
+        log(`piece.getTypeId('I'): ${piece.getTypeId('I')}`);
+        log(`piece.getTypeId('O'): ${piece.getTypeId('O')}`);
+        log(`piece.getTypeId('T'): ${piece.getTypeId('T')}`);
+    </script>
+</body>
+</html>

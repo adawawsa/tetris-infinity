@@ -1,0 +1,416 @@
+/* UI CSS - User Interface Styles */
+
+/* Main Menu */
+.menu-container {
+    text-align: center;
+    max-width: 600px;
+    animation: fadeIn var(--transition-medium);
+}
+
+.game-title {
+    margin-bottom: 60px;
+    animation: glow 3s ease-in-out infinite;
+}
+
+.title-main {
+    display: block;
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+    margin-bottom: 10px;
+}
+
+.title-sub {
+    display: block;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.menu-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.menu-btn {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    border-radius: 8px;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--transition-fast);
+}
+
+.menu-btn:hover::before {
+    opacity: 1;
+}
+
+.btn-icon {
+    font-size: 36px;
+}
+
+.btn-text {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#settings-btn {
+    grid-column: span 2;
+    height: 80px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+/* User Info */
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: var(--text-secondary);
+}
+
+.level-badge {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--bg-primary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.username {
+    font-size: 16px;
+}
+
+/* Settings Screen */
+.settings-container {
+    background: var(--bg-secondary);
+    border: 3px solid var(--border-color);
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.settings-container h2 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    text-align: center;
+    color: var(--primary-color);
+    text-shadow: var(--glow-primary);
+}
+
+.settings-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary-color);
+    transform: scaleX(0);
+    transition: transform var(--transition-fast);
+}
+
+.tab-btn:hover {
+    color: var(--text-secondary);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+}
+
+.tab-btn.active::after {
+    transform: scaleX(1);
+}
+
+.settings-content {
+    min-height: 300px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn var(--transition-fast);
+}
+
+.tab-content h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+/* Control Mapping */
+.control-mapping {
+    display: grid;
+    gap: 15px;
+}
+
+.control-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.control-action {
+    color: var(--text-secondary);
+}
+
+.key-bind {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    color: var(--primary-color);
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 80px;
+    transition: all var(--transition-fast);
+}
+
+.key-bind:hover {
+    border-color: var(--primary-color);
+}
+
+.key-bind.binding {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    animation: pulse 1s infinite;
+}
+
+/* Settings Items */
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.setting-item label {
+    flex: 1;
+    color: var(--text-secondary);
+}
+
+.setting-item input[type="range"] {
+    flex: 2;
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.setting-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.setting-item input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: var(--glow-primary);
+}
+
+.value-display {
+    min-width: 50px;
+    text-align: right;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.setting-item select {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.setting-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.setting-item input[type="number"] {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 5px 10px;
+    border-radius: 4px;
+    width: 80px;
+}
+
+.settings-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border-color);
+}
+
+/* Game Over Screen */
+.gameover-container {
+    background: var(--bg-secondary);
+    border: 3px solid var(--danger-color);
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    max-width: 500px;
+    animation: slide-in-up var(--transition-medium);
+}
+
+.gameover-container h2 {
+    font-size: 48px;
+    color: var(--danger-color);
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+.final-stats {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+
+.stat-row span:first-child {
+    color: var(--text-secondary);
+}
+
+.stat-row span:last-child {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.gameover-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Pause Overlay */
+#pause-overlay {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.pause-message {
+    font-size: 72px;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-shadow: 0 0 30px var(--primary-color);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .menu-container {
+        padding: 20px;
+    }
+    
+    .title-main {
+        font-size: 48px;
+        letter-spacing: 4px;
+    }
+    
+    .title-sub {
+        font-size: 18px;
+        letter-spacing: 8px;
+    }
+    
+    .menu-buttons {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .menu-btn {
+        height: 80px;
+    }
+    
+    #settings-btn {
+        grid-column: span 1;
+    }
+    
+    .settings-container {
+        padding: 20px;
+    }
+    
+    .settings-tabs {
+        flex-wrap: wrap;
+    }
+}

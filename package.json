@@ -1,0 +1,23 @@
+{
+  "name": "tetris-infinity-ex",
+  "version": "1.0.0",
+  "description": "Tetris Infinity EX - A modern take on the classic game with infinite possibilities",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "tetris",
+    "game",
+    "html5",
+    "javascript",
+    "canvas"
+  ],
+  "author": "Tetris Infinity Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adawawsa/tetris-infinity-ex.git"
+  }
+}

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Infinity EX</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/game.css">
+    <link rel="stylesheet" href="styles/ui.css">
+    <link rel="stylesheet" href="styles/effects.css">
+</head>
+<body>
+    <div id="app">
+        <!-- メインメニュー -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-container">
+                <h1 class="game-title">
+                    <span class="title-main">TETRIS</span>
+                    <span class="title-sub">INFINITY EX</span>
+                </h1>
+                
+                <div class="menu-buttons">
+                    <button class="menu-btn primary" data-mode="marathon">
+                        <span class="btn-icon">∞</span>
+                        <span class="btn-text">Marathon</span>
+                    </button>
+                    <button class="menu-btn" data-mode="blitz">
+                        <span class="btn-icon">⚡</span>
+                        <span class="btn-text">Blitz</span>
+                    </button>
+                    <button class="menu-btn" data-mode="battle">
+                        <span class="btn-icon">⚔</span>
+                        <span class="btn-text">Battle</span>
+                    </button>
+                    <button class="menu-btn" data-mode="coop">
+                        <span class="btn-icon">🤝</span>
+                        <span class="btn-text">Co-op</span>
+                    </button>
+                    <button class="menu-btn" id="settings-btn">
+                        <span class="btn-icon">⚙</span>
+                        <span class="btn-text">Settings</span>
+                    </button>
+                </div>
+                
+                <div class="user-info">
+                    <div class="level-badge">Lv.<span id="user-level">1</span></div>
+                    <div class="username" id="username">Guest</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game-screen" class="screen">
+            <div class="game-container">
+                <!-- 左サイドバー -->
+                <div class="sidebar left">
+                    <div class="hold-box">
+                        <h3>HOLD</h3>
+                        <canvas id="hold-canvas" width="120" height="80"></canvas>
+                    </div>
+                    
+                    <div class="stats-box">
+                        <div class="stat-item">
+                            <span class="stat-label">SCORE</span>
+                            <span class="stat-value" id="score">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">LINES</span>
+                            <span class="stat-value" id="lines">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">LEVEL</span>
+                            <span class="stat-value" id="level">1</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">TIME</span>
+                            <span class="stat-value" id="time">00:00</span>
+                        </div>
+                        <div class="stat-item infinity-only">
+                            <span class="stat-label">INFINITY</span>
+                            <span class="stat-value" id="infinity-level">∞ 1</span>
+                        </div>
+                        <div class="stat-item infinity-only">
+                            <span class="stat-label">EXP</span>
+                            <div class="exp-bar-container">
+                                <div class="exp-bar" id="exp-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-slots">
+                        <h3>SKILLS</h3>
+                        <div class="skill-slot" id="skill-1">
+                            <div class="skill-icon"></div>
+                            <div class="skill-cooldown"></div>
+                            <span class="skill-key">Q</span>
+                        </div>
+                        <div class="skill-slot" id="skill-2">
+                            <div class="skill-icon"></div>
+                            <div class="skill-cooldown"></div>
+                            <span class="skill-key">W</span>
+                        </div>
+                        <div class="skill-slot" id="skill-3">
+                            <div class="skill-icon"></div>
+                            <div class="skill-cooldown"></div>
+                            <span class="skill-key">E</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- メインゲームエリア -->
+                <div class="game-area">
+                    <canvas id="game-canvas" width="300" height="600"></canvas>
+                    <canvas id="effects-canvas" width="300" height="600"></canvas>
+                    
+                    <div class="combo-display" id="combo-display">
+                        <div class="combo-text"></div>
+                        <div class="combo-multiplier"></div>
+                    </div>
+                    
+                    <div class="special-effects" id="special-effects"></div>
+                </div>
+
+                <!-- 右サイドバー -->
+                <div class="sidebar right">
+                    <div class="next-box">
+                        <h3>NEXT</h3>
+                        <canvas id="next-canvas" width="120" height="400"></canvas>
+                    </div>
+                    
+                    <div class="item-slots">
+                        <h3>ITEMS</h3>
+                        <div class="item-slot" id="item-1">
+                            <div class="item-icon"></div>
+                            <span class="item-key">1</span>
+                        </div>
+                        <div class="item-slot" id="item-2">
+                            <div class="item-icon"></div>
+                            <span class="item-key">2</span>
+                        </div>
+                        <div class="item-slot" id="item-3">
+                            <div class="item-icon"></div>
+                            <span class="item-key">3</span>
+                        </div>
+                    </div>
+                    
+                    <button class="pause-btn" id="pause-btn">
+                        <span>PAUSE</span>
+                        <span class="key-hint">ESC</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- マルチプレイヤー用追加UI -->
+            <div class="multiplayer-container" id="multiplayer-container">
+                <!-- 対戦相手のゲーム画面 -->
+            </div>
+        </div>
+
+        <!-- 設定画面 -->
+        <div id="settings-screen" class="screen">
+            <div class="settings-container">
+                <h2>Settings</h2>
+                
+                <div class="settings-tabs">
+                    <button class="tab-btn active" data-tab="controls">Controls</button>
+                    <button class="tab-btn" data-tab="audio">Audio</button>
+                    <button class="tab-btn" data-tab="graphics">Graphics</button>
+                    <button class="tab-btn" data-tab="gameplay">Gameplay</button>
+                </div>
+                
+                <div class="settings-content">
+                    <div class="tab-content active" id="controls-tab">
+                        <h3>Keyboard Controls</h3>
+                        <div class="control-mapping">
+                            <div class="control-item">
+                                <span class="control-action">Move Left</span>
+                                <button class="key-bind" data-action="moveLeft">←</button>
+                            </div>
+                            <div class="control-item">
+                                <span class="control-action">Move Right</span>
+                                <button class="key-bind" data-action="moveRight">→</button>
+                            </div>
+                            <div class="control-item">
+                                <span class="control-action">Soft Drop</span>
+                                <button class="key-bind" data-action="softDrop">↓</button>
+                            </div>
+                            <div class="control-item">
+                                <span class="control-action">Hard Drop</span>
+                                <button class="key-bind" data-action="hardDrop">Space</button>
+                            </div>
+                            <div class="control-item">
+                                <span class="control-action">Rotate CW</span>
+                                <button class="key-bind" data-action="rotateCW">↑</button>
+                            </div>
+                            <div class="control-item">
+                                <span class="control-action">Rotate CCW</span>
+                                <button class="key-bind" data-action="rotateCCW">Z</button>
+                            </div>
+                            <div class="control-item">
+                                <span class="control-action">Hold</span>
+                                <button class="key-bind" data-action="hold">C</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="audio-tab">
+                        <h3>Audio Settings</h3>
+                        <div class="setting-item">
+                            <label>Master Volume</label>
+                            <input type="range" id="master-volume" min="0" max="100" value="70">
+                            <span class="value-display">70%</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>BGM Volume</label>
+                            <input type="range" id="bgm-volume" min="0" max="100" value="50">
+                            <span class="value-display">50%</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>SFX Volume</label>
+                            <input type="range" id="sfx-volume" min="0" max="100" value="80">
+                            <span class="value-display">80%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="graphics-tab">
+                        <h3>Graphics Settings</h3>
+                        <div class="setting-item">
+                            <label>Particle Effects</label>
+                            <select id="particle-quality">
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                                <option value="off">Off</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Ghost Piece</label>
+                            <input type="checkbox" id="ghost-piece" checked>
+                        </div>
+                        <div class="setting-item">
+                            <label>Grid Lines</label>
+                            <input type="checkbox" id="grid-lines">
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="gameplay-tab">
+                        <h3>Gameplay Settings</h3>
+                        <div class="setting-item">
+                            <label>DAS (ms)</label>
+                            <input type="number" id="das-delay" min="50" max="300" value="133">
+                        </div>
+                        <div class="setting-item">
+                            <label>ARR (ms)</label>
+                            <input type="number" id="arr-delay" min="0" max="100" value="10">
+                        </div>
+                        <div class="setting-item">
+                            <label>Soft Drop Speed</label>
+                            <select id="soft-drop-speed">
+                                <option value="20">20x</option>
+                                <option value="40">40x</option>
+                                <option value="inf">Instant</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-footer">
+                    <button class="btn secondary" id="reset-settings">Reset to Default</button>
+                    <button class="btn primary" id="save-settings">Save & Return</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ゲームオーバー画面 -->
+        <div id="gameover-screen" class="overlay">
+            <div class="gameover-container">
+                <h2>Game Over</h2>
+                <div class="final-stats">
+                    <div class="stat-row">
+                        <span>Final Score:</span>
+                        <span id="final-score">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Lines Cleared:</span>
+                        <span id="final-lines">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Time:</span>
+                        <span id="final-time">00:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Max Combo:</span>
+                        <span id="final-combo">0</span>
+                    </div>
+                </div>
+                
+                <div class="gameover-buttons">
+                    <button class="btn primary" id="retry-btn">Retry</button>
+                    <button class="btn secondary" id="menu-btn">Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ローディング画面 -->
+        <div id="loading-screen" class="overlay">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

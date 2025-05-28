@@ -1,0 +1,324 @@
+/* Game CSS - Game-specific Styles */
+
+.game-container {
+    display: flex;
+    gap: 40px;
+    padding: 20px;
+    animation: slide-in-up var(--transition-medium);
+}
+
+/* Sidebars */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 200px;
+}
+
+.sidebar.left {
+    animation: slide-in-left var(--transition-slow);
+}
+
+.sidebar.right {
+    animation: slide-in-right var(--transition-slow);
+}
+
+/* Game Area */
+.game-area {
+    position: relative;
+    width: 300px;
+    height: 600px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.9) 100%);
+    border: 3px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+#game-canvas, #effects-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#effects-canvas {
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Hold Box */
+.hold-box, .next-box {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+}
+
+.hold-box h3, .next-box h3 {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+#hold-canvas, #next-canvas {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+}
+
+/* Stats Box */
+.stats-box {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.stat-label {
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: var(--glow-primary);
+}
+
+/* Experience Bar */
+.exp-bar-container {
+    width: 100px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left: auto;
+}
+
+.exp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transition: width 0.3s ease;
+    box-shadow: var(--glow-primary);
+}
+
+/* Hide infinity-only elements by default */
+.infinity-only {
+    display: none;
+}
+
+.game-mode-infinity .infinity-only {
+    display: flex;
+}
+
+/* Skills & Items */
+.skill-slots, .item-slots {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.skill-slots h3, .item-slots h3 {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    margin-bottom: 15px;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.skill-slot, .item-slot {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    margin: 0 auto 10px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.skill-slot:hover, .item-slot:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.skill-slot.active, .item-slot.active {
+    border-color: var(--accent-color);
+    box-shadow: var(--glow-accent);
+}
+
+.skill-icon, .item-icon {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.skill-cooldown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 2px;
+    transition: height var(--transition-fast);
+}
+
+.skill-key, .item-key {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+/* Pause Button */
+.pause-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pause-btn:hover {
+    border-color: var(--warning-color);
+    color: var(--warning-color);
+}
+
+.key-hint {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+/* Combo Display */
+.combo-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.combo-display.active {
+    opacity: 1;
+    animation: combo-bounce 0.6s ease-out;
+}
+
+@keyframes combo-bounce {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.combo-text {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--accent-color);
+    text-shadow: var(--glow-accent);
+    margin-bottom: 5px;
+}
+
+.combo-multiplier {
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+/* Special Effects Container */
+.special-effects {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+/* Multiplayer Container */
+.multiplayer-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: none;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.multiplayer-container.active {
+    display: flex;
+}
+
+.opponent-board {
+    width: 150px;
+    height: 300px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.opponent-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 5px;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Tetromino Colors */
+.tetromino-I { background-color: #00ffff; }
+.tetromino-O { background-color: #ffff00; }
+.tetromino-T { background-color: #ff00ff; }
+.tetromino-S { background-color: #00ff00; }
+.tetromino-Z { background-color: #ff0000; }
+.tetromino-J { background-color: #0000ff; }
+.tetromino-L { background-color: #ff9900; }
+
+/* Ghost Piece */
+.ghost-piece {
+    opacity: 0.3;
+    border: 1px dashed var(--text-tertiary);
+}

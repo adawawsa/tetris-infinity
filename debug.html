@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Tetris Debug</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        #debug-container {
+            display: flex;
+            gap: 20px;
+        }
+        canvas {
+            border: 2px solid #fff;
+        }
+        #console {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            width: 400px;
+            height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tetris Debug Mode</h1>
+    <div>
+        <button onclick="startDebug()">Start Debug</button>
+        <button onclick="dropPiece()">Drop Piece</button>
+        <button onclick="showBoardState()">Show Board State</button>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+    <div id="debug-container">
+        <canvas id="game-canvas" width="300" height="600"></canvas>
+        <div id="console"></div>
+    </div>
+
+    <script type="module">
+        import { Board } from './src/game/Board.js';
+        import { Piece } from './src/game/Piece.js';
+        import { GameLogic } from './src/game/GameLogic.js';
+        
+        window.board = new Board();
+        window.gameLogic = new GameLogic();
+        window.currentPiece = null;
+        window.debugLog = [];
+        
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const consoleDiv = document.getElementById('console');
+        
+        window.log = function(msg) {
+            const timestamp = new Date().toTimeString().split(' ')[0];
+            const logMsg = `[${timestamp}] ${msg}`;
+            debugLog.push(logMsg);
+            consoleDiv.textContent = debugLog.join('\n');
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            console.log(msg);
+        };
+        
+        window.startDebug = function() {
+            log('Starting debug mode...');
+            board.init();
+            spawnPiece();
+            render();
+        };
+        
+        window.dropPiece = function() {
+            if (!currentPiece) {
+                log('No current piece!');
+                return;
+            }
+            
+            log(`Dropping piece ${currentPiece.type} at (${currentPiece.x}, ${currentPiece.y})`);
+            
+            // Move piece down until it can't move anymore
+            while (canMoveDown()) {
+                currentPiece.y++;
+            }
+            
+            // Lock the piece
+            log(`Locking piece at final position (${currentPiece.x}, ${currentPiece.y})`);
+            log(`Piece typeId: ${currentPiece.typeId}`);
+            
+            board.addPiece(currentPiece);
+            
+            // Check board state after adding
+            let filledCells = 0;
+            for (let y = 0; y < board.height; y++) {
+                for (let x = 0; x < board.width; x++) {
+                    if (board.grid[y][x] > 0) {
+                        filledCells++;
+                    }
+                }
+            }
+            log(`Board has ${filledCells} filled cells after adding piece`);
+            
+            // Check for line clears
+            const clearedLines = board.clearLines();
+            log(`Cleared ${clearedLines.length} lines: ${clearedLines}`);
+            
+            // Spawn new piece
+            spawnPiece();
+            render();
+        };
+        
+        window.showBoardState = function() {
+            log('\n=== Board State ===');
+            for (let y = 0; y < board.height; y++) {
+                let row = '';
+                for (let x = 0; x < board.width; x++) {
+                    row += board.grid[y][x] || '.';
+                }
+                log(`Row ${y.toString().padStart(2, '0')}: ${row}`);
+            }
+            log('==================\n');
+        };
+        
+        window.clearConsole = function() {
+            debugLog = [];
+            consoleDiv.textContent = '';
+        };
+        
+        function spawnPiece() {
+            const types = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            currentPiece = new Piece(type);
+            currentPiece.x = Math.floor((board.width - currentPiece.getWidth()) / 2);
+            currentPiece.y = 0;
+            log(`Spawned new piece: ${type} (typeId: ${currentPiece.typeId})`);
+        }
+        
+        function canMoveDown() {
+            if (!currentPiece) return false;
+            
+            currentPiece.y++;
+            const valid = isValidPosition();
+            currentPiece.y--;
+            
+            return valid;
+        }
+        
+        function isValidPosition() {
+            const shape = currentPiece.getShape();
+            
+            for (let row = 0; row < shape.length; row++) {
+                for (let col = 0; col < shape[row].length; col++) {
+                    if (shape[row][col]) {
+                        const boardX = currentPiece.x + col;
+                        const boardY = currentPiece.y + row;
+                        
+                        if (boardX < 0 || boardX >= board.width || boardY >= board.height) {
+                            return false;
+                        }
+                        
+                        if (boardY >= 0 && board.getCell(boardX, boardY) > 0) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            
+            return true;
+        }
+        
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, 300, 600);
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            for (let x = 0; x <= board.width; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * 30, 0);
+                ctx.lineTo(x * 30, 600);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= board.height; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * 30);
+                ctx.lineTo(300, y * 30);
+                ctx.stroke();
+            }
+            
+            // Draw board pieces
+            const colors = ['', '#00ffff', '#ffff00', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff9900'];
+            for (let y = 0; y < board.height; y++) {
+                for (let x = 0; x < board.width; x++) {
+                    const value = board.grid[y][x];
+                    if (value > 0) {
+                        ctx.fillStyle = colors[value] || '#ffffff';
+                        ctx.fillRect(x * 30 + 2, y * 30 + 2, 26, 26);
+                        
+                        // Draw the value
+                        ctx.fillStyle = '#000';
+                        ctx.font = '12px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(value, x * 30 + 15, y * 30 + 15);
+                    }
+                }
+            }
+            
+            // Draw current piece
+            if (currentPiece) {
+                const shape = currentPiece.getShape();
+                ctx.fillStyle = colors[currentPiece.typeId] || '#ffffff';
+                
+                for (let row = 0; row < shape.length; row++) {
+                    for (let col = 0; col < shape[row].length; col++) {
+                        if (shape[row][col]) {
+                            const x = (currentPiece.x + col) * 30;
+                            const y = (currentPiece.y + row) * 30;
+                            ctx.fillRect(x + 2, y + 2, 26, 26);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Auto-render
+        setInterval(render, 100);
+        
+        log('Debug environment ready. Click "Start Debug" to begin.');
+    </script>
+</body>
+</html>

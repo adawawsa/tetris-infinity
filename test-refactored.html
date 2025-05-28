@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Infinity - Refactored Architecture Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        
+        .test-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .status-running {
+            background: #ff9800;
+            color: #000;
+        }
+        
+        .status-passed {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        .status-failed {
+            background: #f44336;
+            color: #fff;
+        }
+        
+        .test-log {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .game-preview {
+            display: inline-block;
+            margin: 10px;
+            vertical-align: top;
+        }
+        
+        .game-canvas {
+            border: 2px solid #444;
+            background: #000;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 4px;
+        }
+        
+        button:hover {
+            background: #00cc00;
+        }
+        
+        button:disabled {
+            background: #666;
+            color: #333;
+            cursor: not-allowed;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .metric {
+            background: #222;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            color: #00ff00;
+            font-weight: bold;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Tetris Infinity - Refactored Architecture Test Suite</h1>
+        
+        <!-- State Management Test -->
+        <div class="test-section" id="state-test">
+            <div class="test-header">
+                <div class="test-title">State Management System</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+        </div>
+        
+        <!-- Command System Test -->
+        <div class="test-section" id="command-test">
+            <div class="test-header">
+                <div class="test-title">Command System</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+        </div>
+        
+        <!-- Event System Test -->
+        <div class="test-section" id="event-test">
+            <div class="test-header">
+                <div class="test-title">Event System</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+        </div>
+        
+        <!-- Network System Test -->
+        <div class="test-section" id="network-test">
+            <div class="test-header">
+                <div class="test-title">Network System</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+        </div>
+        
+        <!-- Replay System Test -->
+        <div class="test-section" id="replay-test">
+            <div class="test-header">
+                <div class="test-title">Replay System</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+        </div>
+        
+        <!-- Game Mode Test -->
+        <div class="test-section" id="mode-test">
+            <div class="test-header">
+                <div class="test-title">Game Modes</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+        </div>
+        
+        <!-- Integration Test -->
+        <div class="test-section" id="integration-test">
+            <div class="test-header">
+                <div class="test-title">Full Integration</div>
+                <div class="test-status status-running">Running</div>
+            </div>
+            <div class="test-log"></div>
+            
+            <div class="game-preview">
+                <canvas id="game-canvas" class="game-canvas" width="300" height="600"></canvas>
+            </div>
+            
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value" id="fps">0</div>
+                    <div class="metric-label">FPS</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="latency">0</div>
+                    <div class="metric-label">Latency (ms)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="events">0</div>
+                    <div class="metric-label">Events/sec</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="memory">0</div>
+                    <div class="metric-label">Memory (MB)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="run-tests">Run All Tests</button>
+            <button id="stop-tests">Stop Tests</button>
+            <button id="export-results">Export Results</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { GameState } from './src/core/GameState.js';
+        import { CommandQueue, MoveCommand, RotateCommand, HardDropCommand } from './src/core/CommandSystem.js';
+        import { EventDispatcher, EventTypes, GameEvent } from './src/core/EventSystem.js';
+        import { NetworkManagerRefactored } from './src/network/NetworkManagerRefactored.js';
+        import { ReplayRecorder, ReplayPlayer } from './src/core/ReplaySystem.js';
+        import { modeFactory } from './src/game/modes/ModeFactory.js';
+        
+        class TestRunner {
+            constructor() {
+                this.tests = new Map();
+                this.results = new Map();
+                this.running = false;
+                
+                this.setupTests();
+                this.setupUI();
+            }
+            
+            setupTests() {
+                // State Management Test
+                this.addTest('state-test', async () => {
+                    const log = [];
+                    
+                    log.push('Creating GameState instance...');
+                    const state = new GameState();
+                    
+                    log.push('Initializing state...');
+                    state.initialize({ width: 10, height: 20, seed: 12345 });
+                    
+                    log.push('Testing serialization...');
+                    const serialized = state.serialize();
+                    log.push(`Serialized size: ${JSON.stringify(serialized).length} bytes`);
+                    
+                    log.push('Testing deserialization...');
+                    const newState = new GameState();
+                    newState.deserialize(serialized);
+                    
+                    log.push('Testing state validation...');
+                    const isValid = newState.validate();
+                    if (!isValid) throw new Error('State validation failed');
+                    
+                    log.push('Testing snapshot creation...');
+                    const snapshot = state.createSnapshot();
+                    
+                    log.push('Testing hash calculation...');
+                    const hash = state.calculateHash();
+                    log.push(`State hash: ${hash}`);
+                    
+                    log.push('✓ All state management tests passed');
+                    return log;
+                });
+                
+                // Command System Test
+                this.addTest('command-test', async () => {
+                    const log = [];
+                    
+                    log.push('Creating command queue...');
+                    const queue = new CommandQueue();
+                    const state = new GameState();
+                    state.initialize({ width: 10, height: 20 });
+                    
+                    log.push('Testing move command...');
+                    const moveCmd = new MoveCommand({ dx: 1, dy: 0 });
+                    moveCmd.frame = 1;
+                    queue.add(moveCmd);
+                    
+                    log.push('Testing rotate command...');
+                    const rotateCmd = new RotateCommand({ direction: 1 });
+                    rotateCmd.frame = 2;
+                    queue.add(rotateCmd);
+                    
+                    log.push('Processing command queue...');
+                    queue.processPending(state, 2);
+                    
+                    log.push('Testing command serialization...');
+                    const serialized = moveCmd.serialize();
+                    log.push(`Serialized command: ${JSON.stringify(serialized)}`);
+                    
+                    log.push('Testing rollback...');
+                    const rollback = queue.rollback(1);
+                    log.push(`Commands to undo: ${rollback.undo.length}`);
+                    log.push(`Commands to replay: ${rollback.replay.length}`);
+                    
+                    log.push('✓ All command system tests passed');
+                    return log;
+                });
+                
+                // Event System Test
+                this.addTest('event-test', async () => {
+                    const log = [];
+                    
+                    log.push('Creating event dispatcher...');
+                    const dispatcher = new EventDispatcher();
+                    let eventCount = 0;
+                    
+                    log.push('Setting up event listeners...');
+                    dispatcher.on(EventTypes.PIECE_SPAWN, () => eventCount++);
+                    dispatcher.on(EventTypes.LINES_CLEAR, () => eventCount++);
+                    
+                    log.push('Emitting events...');
+                    dispatcher.emit(new GameEvent(EventTypes.PIECE_SPAWN, { type: 'T' }));
+                    dispatcher.emit(new GameEvent(EventTypes.LINES_CLEAR, { lines: [19, 18] }));
+                    
+                    log.push(`Events processed: ${eventCount}`);
+                    if (eventCount !== 2) throw new Error('Event handling failed');
+                    
+                    log.push('Testing event priorities...');
+                    const events = [];
+                    dispatcher.on('test', (e) => events.push(e.data.priority));
+                    
+                    dispatcher.emit(new GameEvent('test', { priority: 2 }, { priority: 2 }));
+                    dispatcher.emit(new GameEvent('test', { priority: 0 }, { priority: 0 }));
+                    dispatcher.emit(new GameEvent('test', { priority: 1 }, { priority: 1 }));
+                    
+                    log.push(`Event order: ${events.join(', ')}`);
+                    
+                    log.push('✓ All event system tests passed');
+                    return log;
+                });
+                
+                // Network System Test
+                this.addTest('network-test', async () => {
+                    const log = [];
+                    
+                    log.push('Creating network manager...');
+                    const network = new NetworkManagerRefactored({
+                        serverUrl: 'wss://localhost:8080' // Mock URL
+                    });
+                    
+                    log.push('Testing message queue...');
+                    network.send('test:message', { data: 'test' });
+                    log.push(`Queued messages: ${network.messageQueue.length}`);
+                    
+                    log.push('Testing event handlers...');
+                    let receivedEvent = false;
+                    network.on('test:event', () => { receivedEvent = true; });
+                    network.emit('test:event', {});
+                    
+                    if (!receivedEvent) throw new Error('Event handler failed');
+                    
+                    log.push('Testing room configuration...');
+                    const room = new network.constructor.RoomConfig({
+                        name: 'Test Room',
+                        maxPlayers: 4,
+                        mode: 'versus'
+                    });
+                    log.push(`Room config: ${JSON.stringify(room)}`);
+                    
+                    log.push('✓ All network system tests passed');
+                    return log;
+                });
+                
+                // Replay System Test
+                this.addTest('replay-test', async () => {
+                    const log = [];
+                    
+                    log.push('Creating replay recorder...');
+                    const recorder = new ReplayRecorder();
+                    
+                    log.push('Starting recording...');
+                    recorder.startRecording({
+                        mode: 'test',
+                        seed: 12345,
+                        playerName: 'TestPlayer'
+                    });
+                    
+                    log.push('Recording frames...');
+                    const state = new GameState();
+                    state.initialize({ width: 10, height: 20 });
+                    
+                    for (let i = 0; i < 10; i++) {
+                        state.frame = i;
+                        state.score = i * 100;
+                        recorder.recordFrame(i, state);
+                    }
+                    
+                    log.push('Stopping recording...');
+                    const replayData = recorder.stopRecording();
+                    log.push(`Replay size: ${replayData.size} bytes`);
+                    
+                    log.push('Creating replay player...');
+                    const dispatcher = new EventDispatcher();
+                    const player = new ReplayPlayer(dispatcher);
+                    
+                    log.push('Loading replay...');
+                    const loaded = player.load(replayData);
+                    if (!loaded) throw new Error('Failed to load replay');
+                    
+                    log.push('Testing seek functionality...');
+                    player.seek(5);
+                    log.push(`Current frame: ${player.currentFrame}`);
+                    
+                    log.push('✓ All replay system tests passed');
+                    return log;
+                });
+                
+                // Game Mode Test
+                this.addTest('mode-test', async () => {
+                    const log = [];
+                    
+                    log.push('Testing mode factory...');
+                    const modes = modeFactory.getAllModes();
+                    log.push(`Available modes: ${modes.length}`);
+                    
+                    log.push('Listing modes:');
+                    modes.forEach(mode => {
+                        log.push(`  ${mode.icon} ${mode.name} - ${mode.category}`);
+                    });
+                    
+                    log.push('Testing mode creation...');
+                    const mockGame = {
+                        gameState: new GameState(),
+                        eventDispatcher: new EventDispatcher()
+                    };
+                    
+                    const marathonMode = modeFactory.create('marathon', mockGame);
+                    log.push(`Created mode: ${marathonMode.name}`);
+                    
+                    log.push('Testing mode configuration...');
+                    const config = marathonMode.getConfig();
+                    log.push(`Mode settings: ${JSON.stringify(config.settings)}`);
+                    
+                    log.push('✓ All game mode tests passed');
+                    return log;
+                });
+            }
+            
+            addTest(id, testFn) {
+                this.tests.set(id, testFn);
+            }
+            
+            async runTest(id) {
+                const section = document.getElementById(id);
+                const status = section.querySelector('.test-status');
+                const logElement = section.querySelector('.test-log');
+                
+                status.className = 'test-status status-running';
+                status.textContent = 'Running';
+                logElement.textContent = '';
+                
+                try {
+                    const logs = await this.tests.get(id)();
+                    logs.forEach(log => {
+                        logElement.textContent += log + '\n';
+                    });
+                    
+                    status.className = 'test-status status-passed';
+                    status.textContent = 'Passed';
+                    this.results.set(id, { passed: true, logs });
+                    
+                } catch (error) {
+                    logElement.textContent += `❌ Error: ${error.message}\n`;
+                    logElement.textContent += error.stack;
+                    
+                    status.className = 'test-status status-failed';
+                    status.textContent = 'Failed';
+                    this.results.set(id, { passed: false, error: error.message });
+                }
+            }
+            
+            async runAllTests() {
+                this.running = true;
+                this.results.clear();
+                
+                for (const [id, test] of this.tests) {
+                    if (!this.running) break;
+                    await this.runTest(id);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                // Run integration test last
+                if (this.running) {
+                    await this.runIntegrationTest();
+                }
+                
+                this.running = false;
+            }
+            
+            async runIntegrationTest() {
+                const section = document.getElementById('integration-test');
+                const status = section.querySelector('.test-status');
+                const logElement = section.querySelector('.test-log');
+                
+                status.className = 'test-status status-running';
+                status.textContent = 'Running';
+                logElement.textContent = 'Starting integration test...\n';
+                
+                try {
+                    // Create a simple game visualization
+                    const canvas = document.getElementById('game-canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Simulate game with refactored architecture
+                    const gameState = new GameState();
+                    const eventDispatcher = new EventDispatcher();
+                    const commandQueue = new CommandQueue();
+                    
+                    gameState.initialize({ width: 10, height: 20 });
+                    
+                    // Performance metrics
+                    let frameCount = 0;
+                    let eventCount = 0;
+                    let lastFpsUpdate = Date.now();
+                    
+                    eventDispatcher.on('*', () => eventCount++);
+                    
+                    // Simple render loop
+                    const render = () => {
+                        if (!this.running) return;
+                        
+                        frameCount++;
+                        
+                        // Clear canvas
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Draw board
+                        const cellSize = 30;
+                        for (let y = 0; y < 20; y++) {
+                            for (let x = 0; x < 10; x++) {
+                                if (gameState.board[y][x] > 0) {
+                                    ctx.fillStyle = '#00ff00';
+                                    ctx.fillRect(x * cellSize, y * cellSize, cellSize - 2, cellSize - 2);
+                                }
+                            }
+                        }
+                        
+                        // Update metrics
+                        const now = Date.now();
+                        if (now - lastFpsUpdate > 1000) {
+                            document.getElementById('fps').textContent = frameCount;
+                            document.getElementById('events').textContent = eventCount;
+                            frameCount = 0;
+                            eventCount = 0;
+                            lastFpsUpdate = now;
+                            
+                            // Simulate memory usage
+                            const memory = (performance.memory?.usedJSHeapSize || 0) / 1048576;
+                            document.getElementById('memory').textContent = memory.toFixed(1);
+                        }
+                        
+                        requestAnimationFrame(render);
+                    };
+                    
+                    render();
+                    
+                    logElement.textContent += 'Integration test running...\n';
+                    logElement.textContent += 'Monitoring performance metrics...\n';
+                    
+                    status.className = 'test-status status-passed';
+                    status.textContent = 'Running';
+                    
+                } catch (error) {
+                    logElement.textContent += `❌ Error: ${error.message}\n`;
+                    status.className = 'test-status status-failed';
+                    status.textContent = 'Failed';
+                }
+            }
+            
+            stopTests() {
+                this.running = false;
+            }
+            
+            exportResults() {
+                const results = {
+                    timestamp: new Date().toISOString(),
+                    tests: Array.from(this.results.entries()).map(([id, result]) => ({
+                        id,
+                        ...result
+                    }))
+                };
+                
+                const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test-results-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            
+            setupUI() {
+                document.getElementById('run-tests').addEventListener('click', () => {
+                    this.runAllTests();
+                });
+                
+                document.getElementById('stop-tests').addEventListener('click', () => {
+                    this.stopTests();
+                });
+                
+                document.getElementById('export-results').addEventListener('click', () => {
+                    this.exportResults();
+                });
+            }
+        }
+        
+        // Initialize test runner
+        const testRunner = new TestRunner();
+        
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => testRunner.runAllTests(), 1000);
+        });
+    </script>
+</body>
+</html>

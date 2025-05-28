@@ -1,0 +1,174 @@
+# Tetris Infinity EX 詳細設計書 (v0.1)
+
+> **対象**: PC Web ブラウザ & Steam ネイティブ版 **参照**: 《テトリス究極版 要件定義書》 rev.2025‑05‑26
+
+---
+
+## 1. システム全体像
+
+```
+┌─────────────┐       ┌────────────┐
+│  Unity WebGL   │  gRPC │  GameServer │
+│ (Client Logic) │◀─────▶│ Authority   │
+└─────┬─────────┘       └────┬───────┘
+      │WebSocket TLS             │Redis Streams
+┌─────▼─────────┐       ┌─────▼──────────┐
+│  Gateway/API   │──────▶│   Matchmaker   │
+│ (Envoy + Go)   │       └───────────────┘
+└─────┬─────────┘HTTP          ▲ OpenMatch
+      │ Prometheus            │
+┌─────▼─────────┐   gRPC   ┌──▼───────────┐
+│    AuthSvc     │────────▶│User Service  │ CockroachDB
+└────────────────┘         └──────────────┘
+```
+
+*※ 図は論理構成。物理環境は GKE 3リージョン (asia‑northeast1/2, us‑west2)。*
+
+## 2. クライアント (Unity WebGL)
+
+### 2.1 プロジェクト構成 (Assembly Defs)
+
+| Layer        | asmdef                | 主要クラス                                  | 機能                    |
+| ------------ | --------------------- | -------------------------------------- | --------------------- |
+| Presentation | `TIE.Client.UI`       | `UiGameBoard`, `UiHud`, `ThemeManager` | HUD/テーマ切替             |
+| Domain       | `TIE.Client.GameCore` | `Piece`, `Board`, `RotationSystem`     | SRSロジック               |
+| Networking   | `TIE.Client.Net`      | `WebSocketClient`, `PacketSerializer`  | gRPC‑Web WS Transport |
+| Platform     | `TIE.Client.Platform` | `InputAdapter`, `SettingsRepo`         | ブラウザAPIラッパ            |
+| Tests        | `TIE.Client.Tests`    | PlayMode & EditMode Tests              | CI 用                  |
+
+### 2.2 レンダリングパイプライン
+
+* URP + GPU Instancing でフィールドセルをバッチ描画 (Draw Calls < 50)。
+* WebGL 2.0 限定。デスクトップはもっぱら VSync Off, 144 fps 解放。
+
+### 2.3 入力系
+
+* **ブラウザ**: `KeyboardEvent.code` ベース。低レイヤ Hook を設け、DAS/ARR 計算を `InputSystem.Update()` 内1フレーム遅延で処理。
+* **Steam**: Rewired で XInput & DirectInput を抽象化。
+
+## 3. サーバサイド
+
+### 3.1 マイクロサービス一覧
+
+| Service    | Purpose                          | Tech           | Data Store        |
+| ---------- | -------------------------------- | -------------- | ----------------- |
+| Gateway    | TLS終端, gRPC‑Web変換                | Envoy Proxy    | –                 |
+| AuthSvc    | JWT発行, OAuth2 (Steam)            | Go + Ory Hydra | CockroachDB.Users |
+| Matchmaker | Lobby/Elo計算, Ticket発行            | OpenMatch      | Redis Streams     |
+| GameServer | 権威判定, Garbage Roll, Attack Queue | Go + ECS       | Mem (hot) + Redis |
+| ReplaySvc  | デルタ圧縮リプレイ保存                      | Go             | GCS Coldline      |
+| StatsSvc   | KPI ログ → ClickHouse              | Golang Worker  | ClickHouse        |
+
+### 3.2 データモデル (抜粋)
+
+```sql
+CREATE TABLE users (
+  user_id UUID PRIMARY KEY,
+  steam_id BIGINT UNIQUE,
+  email TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE matches (
+  match_id UUID PRIMARY KEY,
+  mode SMALLINT, -- 0:Marathon 1:BR99 ...
+  created_at TIMESTAMPTZ,
+  duration_sec SMALLINT,
+  winner_user_id UUID,
+  metadata JSONB
+);
+
+CREATE TABLE inventory_cosmetics (
+  user_id UUID,
+  cosmetic_id INT,
+  acquired_at TIMESTAMPTZ,
+  PRIMARY KEY (user_id, cosmetic_id)
+);
+```
+
+## 4. API 定義 (gRPC)
+
+```proto
+service MatchService {
+  rpc FindMatch (FindMatchRequest) returns (MatchTicket);
+  rpc CancelMatch (CancelMatchRequest) returns (google.protobuf.Empty);
+}
+
+message FindMatchRequest { string mode = 1; }
+message MatchTicket { string ticket_id = 1; int64 estimate_sec = 2; }
+```
+
+*スキーマ完全版は /proto/*.proto 参照\*
+
+## 5. ゲームロジック詳細
+
+### 5.1 Garbage Attack Queue (BR99)
+
+1. 攻撃行発生 → `GameServer.enqueueAttack(target, lines)`
+2. キューはPing補正²を行い 250 ms 窓で統合
+3. Client は `AttackFrame { frame_id, garbage_heights[] }` を受信し10F後適用
+
+### 5.2 RNG & SRS
+
+* **RNG**: 7‑Bag をサーバで生成。`seed = sha256(match_id + frame_idx)`
+* **Wall Kick**: TGM3 SRS Kick Table。左右反転は不要。
+
+## 6. セキュリティ/アンチチート
+
+* WebAssembly 内部計算とサーバ authoritative delta を照合 (±2F 許容)。
+* 入力頻度 ML モデル (CatBoost) でボットを検出 – 過去1000入力窓で AUC 0.96。
+
+## 7. DevOps & CI/CD
+
+* ブランチ戦略: trunk‑based + release branch (週)。
+* GitHub Actions → Buildkite self‑host runner → GKE deploy
+* Canary: 1% トラフィック、30分ヘルスOKで全量。
+
+## 8. パフォーマンス計測
+
+| Metric        | Target        | Tool                |
+| ------------- | ------------- | ------------------- |
+| 99th WS RTT   | <150 ms       | k6 + Locust         |
+| Avg FrameTime | <6 ms @144fps | Unity Profiler      |
+| Memory Leak   | <1 MB/5min    | Valgrind Emscripten |
+
+## 9. テスト設計
+
+* **Unit**: 3,000+ Domain ロジック (Board ops) via NUnit
+* **Integration**: Matchmaker↔GameServer 合同テスト (Testcontainer)
+* **Load**: 10k 同時 BR99 部屋 (Agones‐perf)
+
+## 10. 展開計画
+
+| Date    | Milestone             | Environment   |
+| ------- | --------------------- | ------------- |
+| 2025‑07 | Alpha0 内部QA           | Staging‑JP    |
+| 2025‑09 | Alpha1 公開CBT          | Staging‑US/EU |
+| 2025‑12 | Beta (Steam Playtest) | Prod partial  |
+| 2026‑02 | Global Launch         | Prod full     |
+
+## 11. 未決事項
+
+* **片手操作モード (モバイル行)** → Web版に需要? → backlog
+* **UGC Puzzle承認フロー**
+* **GDPR DSAR 自動ワークフロー**
+
+---
+
+### 付録: Cloud Build Manifest (簡略版)
+
+```yaml
+steps:
+  - id: build-client
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args: ["./scripts/build_webgl.sh"]
+  - id: build-server
+    name: gcr.io/cloud-builders/go
+    args: ["go", "build", "./cmd/gameserver"]
+  - id: dockerize
+    name: docker
+    args: ["build", "-t", "gcr.io/${PROJECT_ID}/gameserver:$REV", "."]
+images:
+  - "gcr.io/${PROJECT_ID}/gameserver:$REV"
+```

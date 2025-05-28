@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tetris Infinity</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+        }
+        #test-log {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            margin-top: 20px;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #222;
+            border-radius: 4px;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tetris Infinity Test Page</h1>
+    
+    <div class="status">
+        <h3>Test Controls:</h3>
+        <button onclick="testBoardMethods()">Test Board Methods</button>
+        <button onclick="testSkillSystem()">Test Skill System</button>
+        <button onclick="testItemSystem()">Test Item System</button>
+        <button onclick="testGameFlow()">Test Game Flow</button>
+    </div>
+    
+    <div id="test-log"></div>
+    
+    <script type="module">
+        import { Board } from './src/game/Board.js';
+        import { Piece } from './src/game/Piece.js';
+        import { GameLogic } from './src/game/GameLogic.js';
+        import { TETROMINOS, SKILLS, ITEMS } from './src/config/GameConfig.js';
+        
+        const log = document.getElementById('test-log');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            log.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        window.testBoardMethods = function() {
+            addLog('=== Testing Board Methods ===');
+            
+            try {
+                const board = new Board();
+                addLog('✓ Board created successfully', 'success');
+                
+                // Test clearBottomLines
+                board.grid[19] = Array(10).fill(1);
+                board.grid[18] = Array(10).fill(2);
+                const cleared = board.clearBottomLines(2);
+                addLog(`✓ clearBottomLines(2) returned ${cleared.length} lines`, 'success');
+                
+                // Test getHeight
+                board.clear();
+                board.grid[15][5] = 1;
+                const height = board.getHeight();
+                addLog(`✓ getHeight() returned ${height} (expected 5)`, height === 5 ? 'success' : 'error');
+                
+                // Test checkPerfectClear
+                const gameLogic = new GameLogic({});
+                board.clear();
+                const isPerfectClear = gameLogic.checkPerfectClear(board);
+                addLog(`✓ checkPerfectClear() returned ${isPerfectClear} (expected true)`, isPerfectClear ? 'success' : 'error');
+                
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+        
+        window.testSkillSystem = function() {
+            addLog('=== Testing Skill System ===');
+            
+            try {
+                // Check if all skills are defined
+                const requiredSkills = ['FREEZE', 'BOMB', 'GRAVITY'];
+                
+                for (const skillId of requiredSkills) {
+                    if (SKILLS[skillId]) {
+                        addLog(`✓ Skill ${skillId} is defined`, 'success');
+                        addLog(`  - Name: ${SKILLS[skillId].name}`);
+                        addLog(`  - Icon: ${SKILLS[skillId].icon}`);
+                        addLog(`  - Cooldown: ${SKILLS[skillId].cooldown}ms`);
+                    } else {
+                        addLog(`✗ Skill ${skillId} is missing`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+        
+        window.testItemSystem = function() {
+            addLog('=== Testing Item System ===');
+            
+            try {
+                // Check if all items are defined
+                const requiredItems = ['DOUBLE_SCORE', 'SLOW_FALL', 'PREVIEW_EXTEND', 'GHOST_SOLID'];
+                
+                for (const itemId of requiredItems) {
+                    if (ITEMS[itemId]) {
+                        addLog(`✓ Item ${itemId} is defined`, 'success');
+                        addLog(`  - Name: ${ITEMS[itemId].name}`);
+                        addLog(`  - Icon: ${ITEMS[itemId].icon}`);
+                        addLog(`  - Duration: ${ITEMS[itemId].duration}ms`);
+                    } else {
+                        addLog(`✗ Item ${itemId} is missing`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+        
+        window.testGameFlow = function() {
+            addLog('=== Testing Game Flow ===');
+            
+            try {
+                // Test piece generation
+                const gameLogic = new GameLogic({});
+                const bag = gameLogic.generateBag();
+                addLog(`✓ generateBag() returned ${bag.length} pieces`, bag.length === 7 ? 'success' : 'error');
+                
+                // Test piece types
+                const pieceTypes = bag.map(p => p.type);
+                const uniqueTypes = [...new Set(pieceTypes)];
+                addLog(`✓ Bag contains ${uniqueTypes.length} unique pieces: ${uniqueTypes.join(', ')}`, 'success');
+                
+                // Test piece creation
+                for (const type of ['I', 'O', 'T', 'S', 'Z', 'J', 'L']) {
+                    try {
+                        const piece = new Piece(type);
+                        const shape = piece.getShape();
+                        addLog(`✓ Piece ${type} created with shape ${shape.length}x${shape[0].length}`, 'success');
+                    } catch (e) {
+                        addLog(`✗ Failed to create piece ${type}: ${e.message}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                addLog(`✗ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        };
+        
+        // Auto-run tests
+        addLog('=== Tetris Infinity Test Suite ===');
+        addLog('Click the buttons above to run specific tests');
+    </script>
+</body>
+</html>
